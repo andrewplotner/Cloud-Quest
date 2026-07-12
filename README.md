@@ -1,8 +1,8 @@
-# Cloud Quest
+# Cloud Architect Quest
 
-A touch-first HTML5 game designed to run in a browser and ship as an Android app through [Capacitor](https://capacitorjs.com/).
+A self-contained AWS architecture study game packaged for Android through [Capacitor](https://capacitorjs.com/).
 
-The starter game is already playable: steer the glider by dragging, collect stars, avoid storm clouds, and chase a locally saved high score. It is intentionally dependency-light so the game can evolve without being tied to a large framework.
+The complete HTML game is stored losslessly as compressed chunks under `game/chunks/`. The build reconstructs it, then adds mobile viewport and safe-area support plus the Architect Blueprint loading screen without rewriting the uploaded source.
 
 ## Quick start
 
@@ -32,17 +32,28 @@ See [`docs/PLAY_STORE.md`](docs/PLAY_STORE.md) for release preparation and Play 
 
 ## Project layout
 
-- `src/game.ts` — canvas game loop, controls, scoring, and rendering
-- `src/style.css` — responsive phone-first presentation
+- `game/chunks/` — lossless compressed copy of the canonical self-contained game
+- `scripts/build.mjs` — repeatable mobile packaging and splash injection
+- `assets/splash/` — in-app loading artwork
+- `assets/source/` — original, unmodified source artwork for future asset work
 - `capacitor.config.ts` — Android wrapper identity and web bundle location
 - `android/` — generated native Android Studio project
 - `docs/PLAY_STORE.md` — native build and release checklist
-- `.github/workflows/ci.yml` — type-check and production build on every change
+- `.github/workflows/ci.yml` — web packaging, Android debug build, and downloadable APK artifact on every change
 
 ## Current application identity
 
-- Name: **Cloud Quest**
+- Name: **Cloud Architect Quest**
 - Android application ID: `com.andrewplotner.cloudquest`
 - Web output: `dist/`
 
 Review the application ID before the first Play Store release; it becomes the permanent identity of the app.
+
+## Import a future game version
+
+```bash
+npm run import:game -- /path/to/updated-game.html
+npm run android:sync
+```
+
+The import command replaces the committed chunks. The same workflow is available for replacement splash art with `npm run import:splash -- /path/to/splash.png`.

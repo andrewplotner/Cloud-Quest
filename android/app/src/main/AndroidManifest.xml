@@ -35,7 +35,5 @@
         </provider>
     </application>
 
-    <!-- Permissions -->
-
-    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- The packaged game is offline and requests no runtime permissions. -->
 </manifest>

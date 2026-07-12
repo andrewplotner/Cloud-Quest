@@ -1,12 +1,14 @@
 {
   "name": "cloud-quest",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
+    "dev": "npm run build && vite dist --host 0.0.0.0",
+    "build": "node scripts/build.mjs",
+    "preview": "vite dist --host 0.0.0.0",
+    "import:game": "node scripts/import-asset.mjs game",
+    "import:splash": "node scripts/import-asset.mjs splash",
     "android:sync": "npm run build && cap sync android",
     "android:open": "cap open android",
     "android:run": "npm run android:sync && cap run android"

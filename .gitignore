@@ -8,3 +8,6 @@ android/.gradle/
 android/local.properties
 android/app/build/
 android/build/
+game/index.html
+assets/splash/architect-blueprint.png
+assets/source/app-icon-original.png
