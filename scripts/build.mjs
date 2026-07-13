@@ -59,7 +59,7 @@ const mobileStyles = String.raw`
     overflow-wrap: anywhere;
   }
 
-  /* The outer stage is the viewport. The injected inner track owns the authored map coordinates. */
+  /* The outer stage is the viewport. Every map layer uses the same fixed-pixel inner canvas. */
   .questWorldMap {
     width: 100%;
     max-width: 100%;
@@ -71,8 +71,8 @@ const mobileStyles = String.raw`
     width: auto !important;
     max-width: 100%;
     min-width: 0 !important;
-    height: clamp(620px, 68vh, 720px);
-    min-height: 620px !important;
+    height: 682px;
+    min-height: 682px !important;
     overflow-x: auto !important;
     overflow-y: hidden !important;
     overscroll-behavior-x: contain;
@@ -94,23 +94,76 @@ const mobileStyles = String.raw`
   }
   .questWorldMap .questWorldTrack {
     position: relative;
-    width: max(2400px, 100%);
+    width: 2400px;
     min-width: 2400px;
-    height: 100%;
-    min-height: 100%;
+    height: 680px;
+    min-height: 680px;
   }
   .questWorldMap .questWorldTrack > .questWorldSvg {
     position: absolute !important;
     inset: 0 !important;
     display: block !important;
-    width: 100% !important;
+    width: 2400px !important;
     min-width: 0 !important;
     max-width: none !important;
-    height: 100% !important;
+    height: 680px !important;
     pointer-events: none;
   }
   .questWorldMap .questWorldTrack > .floatingRealm {
     position: absolute !important;
+    width: 210px !important;
+    transform: none !important;
+    animation: none !important;
+    filter: none !important;
+    transform-origin: center 86px !important;
+  }
+  .questWorldMap .questWorldTrack > .floatingRealm.locked {
+    transform: none !important;
+    filter: none !important;
+    opacity: 0.42 !important;
+  }
+  .questWorldMap .questWorldTrack .worldIslandSprite,
+  .questWorldMap .questWorldTrack .floatingRealm:hover .worldIslandSprite,
+  .questWorldMap .questWorldTrack .floatingRealm.current .worldIslandSprite,
+  .questWorldMap .questWorldTrack .floatingRealm.locked .worldIslandSprite {
+    width: 210px !important;
+    height: 190px !important;
+    margin: 0 auto -12px !important;
+    transform: none !important;
+    filter: none !important;
+  }
+  .questWorldMap .questWorldTrack .worldIslandSprite svg {
+    width: 210px !important;
+    height: 190px !important;
+    overflow: visible !important;
+  }
+  /* Android WebView can drop these large inline SVGs when nested SVG/CSS filters are combined. */
+  .questWorldMap .questWorldTrack .worldIslandSvgAsset [filter] {
+    filter: none !important;
+  }
+  .questWorldMap .questWorldTrack .islandPlate,
+  .questWorldMap .questWorldTrack .floatingRealm.locked .islandPlate {
+    left: 50% !important;
+    top: 2px !important;
+    transform: translateX(-50%) !important;
+    width: max-content;
+    max-width: 190px;
+    white-space: normal;
+    line-height: 1.15;
+  }
+  .questWorldMap .questWorldTrack .realmCaption {
+    width: 210px;
+    margin-top: -6px !important;
+    transform: none !important;
+    transform-origin: top center;
+  }
+  .questWorldMap .questWorldTrack .questRoutePath {
+    stroke-width: 10;
+    stroke-dasharray: 26 18;
+  }
+  .questWorldMap .questWorldTrack .questRoutePath.active {
+    stroke-width: 12;
+    stroke-dasharray: 30 18;
   }
 
   .topbar { gap: 8px; }
@@ -160,8 +213,8 @@ const mobileStyles = String.raw`
     .trayCards { flex-wrap: wrap; }
     .grid { grid-template-columns: 1fr !important; }
     .questWorldMap .questWorldStage {
-      height: 680px;
-      min-height: 680px !important;
+      height: 682px;
+      min-height: 682px !important;
       margin-right: 8px;
       margin-left: 8px;
     }
@@ -204,8 +257,12 @@ const splashMarkup = String.raw`
     }, delay);
   }
 
-  const mapX = [5, 11.5, 22, 32, 42, 52, 62, 72, 82, 93];
-  const mapY = [58, 35, 58, 30, 56, 26, 44, 72, 22, 63];
+  const mapWidth = 2400;
+  const mapHeight = 680;
+  const realmAnchorX = 105;
+  const realmAnchorY = 86;
+  const mapX = [105, 275, 545, 805, 1065, 1325, 1585, 1845, 2105, 2300];
+  const mapY = [390, 230, 390, 210, 370, 190, 315, 485, 170, 420];
 
   function enhanceWorldMap(stage) {
     if (!stage || stage.dataset.caqScrollableMap === '1') return;
@@ -222,8 +279,12 @@ const splashMarkup = String.raw`
     track.className = 'questWorldTrack';
     stage.insertBefore(track, stage.firstChild);
     track.appendChild(svg);
+    svg.setAttribute('viewBox', '0 0 ' + mapWidth + ' ' + mapHeight);
+    svg.setAttribute('preserveAspectRatio', 'none');
     realms.forEach((realm, index) => {
-      realm.style.left = 'calc(' + mapX[index] + '% - 105px)';
+      realm.dataset.caqRealmIndex = String(index);
+      realm.style.left = (mapX[index] - realmAnchorX) + 'px';
+      realm.style.top = (mapY[index] - realmAnchorY) + 'px';
       track.appendChild(realm);
     });
 
