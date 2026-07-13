@@ -28,6 +28,59 @@ if (!/<meta\s+name=["']theme-color["']/i.test(html)) {
   html = html.replace(/<\/head>/i, '<meta name="theme-color" content="#06142e">\n</head>');
 }
 
+function replaceExactlyOnce(source, label, find, replacement) {
+  const first = source.indexOf(find);
+  if (first < 0) throw new Error(`Could not find ${label} in the imported game.`);
+  if (source.indexOf(find, first + find.length) >= 0) {
+    throw new Error(`Found more than one ${label}; refusing an ambiguous map rewrite.`);
+  }
+  return source.slice(0, first) + replacement + source.slice(first + find.length);
+}
+
+/* Rewrite the game's renderer itself. The map no longer depends on a post-render DOM controller. */
+html = replaceExactlyOnce(
+  html,
+  'Adventure map positions',
+  ` const mapPos=[
+   {x:8,y:58},{x:21,y:35},{x:35,y:58},{x:47,y:30},{x:58,y:56},
+   {x:68,y:26},{x:79,y:44},{x:71,y:72},{x:86,y:22},{x:90,y:63}
+ ];`,
+  ` const mapPos=[
+   {x:105,y:390},{x:275,y:230},{x:545,y:390},{x:805,y:210},{x:1065,y:370},
+   {x:1325,y:190},{x:1585,y:315},{x:1845,y:485},{x:2105,y:170},{x:2300,y:420}
+ ];`,
+);
+
+html = replaceExactlyOnce(
+  html,
+  'Adventure realm positioning template',
+  'style="left:calc(${p.x}% - 105px); top:calc(${p.y}% - 86px);"',
+  'style="left:${p.x-105}px; top:${p.y-86}px;"',
+);
+
+html = replaceExactlyOnce(
+  html,
+  'Adventure map stage template',
+  `   <div class="questWorldStage">
+     <svg class="questWorldSvg" viewBox="0 0 100 100" preserveAspectRatio="none">\${paths}</svg>
+     \${nodes}
+   </div>`,
+  `   <div class="questWorldStage" tabindex="0" role="region" aria-label="Adventure world map. Scroll horizontally to explore all islands." data-caq-map-build="0.5.0">
+     <div class="questWorldTrack">
+       <svg class="questWorldSvg" viewBox="0 0 2400 680" preserveAspectRatio="none">\${paths}</svg>
+       \${nodes}
+     </div>
+   </div>`,
+);
+
+html = replaceExactlyOnce(
+  html,
+  'Adventure build badge insertion point',
+  '         <span class="questPill">Goal: conquer each realm and reach Exam Summit</span>',
+  `         <span class="questPill">Goal: conquer each realm and reach Exam Summit</span>
+         <span class="questPill caqBuildBadge">Build 0.5.0</span>`,
+);
+
 const mobileStyles = String.raw`
 <style id="caq-mobile-shell">
   html { background: #06142e; }
@@ -247,7 +300,7 @@ const splashMarkup = String.raw`
 </div>
 <script id="caq-mobile-controller">
 (() => {
-  const appBuild = '0.4.0';
+  const appBuild = '0.5.0';
   const splash = document.getElementById('caq-app-splash');
   const started = performance.now();
   let splashHidden = false;
@@ -263,90 +316,7 @@ const splashMarkup = String.raw`
     }, delay);
   }
 
-  const mapWidth = 2400;
-  const mapHeight = 680;
-  const realmAnchorX = 105;
-  const realmAnchorY = 86;
-  const mapX = [105, 275, 545, 805, 1065, 1325, 1585, 1845, 2105, 2300];
-  const mapY = [390, 230, 390, 210, 370, 190, 315, 485, 170, 420];
-
-  function enhanceWorldMap(stage) {
-    if (!stage || stage.dataset.caqScrollableMap === '1') return;
-    /* Avoid :scope here: some Android System WebView releases reject that selector. */
-    const stageChildren = Array.from(stage.children);
-    const realms = stageChildren.filter((child) => child.classList.contains('floatingRealm'));
-    const svg = stageChildren.find((child) => child.classList.contains('questWorldSvg'));
-    if (!svg || realms.length !== mapX.length) return;
-
-    stage.tabIndex = 0;
-    stage.setAttribute('role', 'region');
-    stage.setAttribute('aria-label', 'Adventure world map. Scroll horizontally to explore all islands.');
-
-    const track = document.createElement('div');
-    track.className = 'questWorldTrack';
-    stage.insertBefore(track, stage.firstChild);
-    track.appendChild(svg);
-    svg.setAttribute('viewBox', '0 0 ' + mapWidth + ' ' + mapHeight);
-    svg.setAttribute('preserveAspectRatio', 'none');
-    realms.forEach((realm, index) => {
-      realm.dataset.caqRealmIndex = String(index);
-      realm.style.left = (mapX[index] - realmAnchorX) + 'px';
-      realm.style.top = (mapY[index] - realmAnchorY) + 'px';
-      track.appendChild(realm);
-    });
-
-    const routes = Array.from(svg.querySelectorAll('.questRoutePath'));
-    routes.forEach((route, index) => {
-      if (index >= mapX.length - 1) return;
-      const middleX = (mapX[index] + mapX[index + 1]) / 2;
-      const middleY = (mapY[index] + mapY[index + 1]) / 2 + (index % 2 === 0 ? -7 : 8);
-      route.setAttribute(
-        'd',
-        'M ' + mapX[index] + ',' + mapY[index] + ' Q ' + middleX + ',' + middleY + ' ' + mapX[index + 1] + ',' + mapY[index + 1],
-      );
-    });
-
-    stage.addEventListener('keydown', (event) => {
-      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
-      event.preventDefault();
-      stage.scrollBy({ left: event.key === 'ArrowLeft' ? -280 : 280, behavior: 'smooth' });
-    });
-
-    const worldMap = stage.closest('.questWorldMap');
-    const pillRow = worldMap ? worldMap.querySelector('.questPillRow') : null;
-    if (pillRow && !pillRow.querySelector('.caqBuildBadge')) {
-      const buildBadge = document.createElement('span');
-      buildBadge.className = 'questPill caqBuildBadge';
-      buildBadge.textContent = 'Build ' + appBuild;
-      pillRow.appendChild(buildBadge);
-    }
-
-    stage.dataset.caqScrollableMap = '1';
-    stage.dataset.caqMapBuild = appBuild;
-    requestAnimationFrame(() => { stage.scrollLeft = 0; });
-  }
-
-  function enhanceRenderedMaps(root = document) {
-    if (root.nodeType === Node.ELEMENT_NODE && root.matches('.questWorldMap .questWorldStage')) {
-      enhanceWorldMap(root);
-    }
-    if (!root.querySelectorAll) return;
-    root.querySelectorAll('.questWorldMap .questWorldStage').forEach(enhanceWorldMap);
-  }
-
-  const observer = new MutationObserver((mutations) => {
-    for (const mutation of mutations) {
-      for (const node of mutation.addedNodes) {
-        if (node.nodeType !== Node.ELEMENT_NODE) continue;
-        enhanceRenderedMaps(node);
-      }
-    }
-  });
-  observer.observe(document.documentElement, { childList: true, subtree: true });
-  enhanceRenderedMaps();
-
   window.addEventListener('load', () => {
-    enhanceRenderedMaps();
     hideSplash();
   }, { once: true });
   window.setTimeout(hideSplash, 6000);
@@ -355,9 +325,9 @@ const splashMarkup = String.raw`
 `;
 
 html = html.replace(/<\/head>/i, `${mobileStyles}</head>`);
-html = html.replace(/<body([^>]*)>/i, `<body$1>${splashMarkup}`);
+html = html.replace(/<body([^>]*)>/i, `<body$1 data-caq-app-build="0.5.0">${splashMarkup}`);
 
-if (!html.includes('id="caq-app-splash"') || !html.includes('className = \'questWorldTrack\'')) {
+if (!html.includes('id="caq-app-splash"') || !html.includes('class="questWorldTrack"') || !html.includes('data-caq-map-build="0.5.0"')) {
   throw new Error('Could not inject the mobile application shell.');
 }
 

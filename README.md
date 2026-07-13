@@ -6,7 +6,7 @@ The complete HTML game is stored losslessly as compressed chunks under `game/chu
 
 The current packaged source is **v8.5**. Its Adventure world map uses one fixed 2400×680 canvas for route paths, island artwork, status ribbons, and captions. Phones initially show Tutorial Islands and Keyword Coast, while wider desktop windows expose more of the route before scrolling is needed.
 
-Android test builds display their application build number in the Adventure map header. The CI workflow caches a stable debug signing key so builds after 0.4.0 can update one another without losing local game progress.
+Android test builds display their application build number in the Adventure map header. Starting with 0.5.0, the fixed map track is emitted directly by the game renderer instead of being added by a runtime observer. The CI workflow caches a stable debug signing key so builds after 0.4.0 can update one another without losing local game progress.
 
 ## Quick start
 
