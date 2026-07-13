@@ -21,6 +21,26 @@ jobs:
         with:
           node-version: 24
           cache: npm
+      - name: Restore stable debug signing key
+        uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: cloud-quest-debug-keystore-v1
+      - name: Create debug signing key on first run
+        shell: bash
+        run: |
+          if [ ! -f "$HOME/.android/debug.keystore" ]; then
+            mkdir -p "$HOME/.android"
+            keytool -genkeypair -v \
+              -keystore "$HOME/.android/debug.keystore" \
+              -storepass android \
+              -alias androiddebugkey \
+              -keypass android \
+              -dname "CN=Android Debug,O=Android,C=US" \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000
+          fi
       - run: npm ci
       - run: npm run android:sync
       - uses: gradle/actions/setup-gradle@v4

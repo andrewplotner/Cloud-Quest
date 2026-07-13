@@ -165,6 +165,10 @@ const mobileStyles = String.raw`
     stroke-width: 12;
     stroke-dasharray: 30 18;
   }
+  .questWorldMap .caqBuildBadge {
+    border-color: rgba(34, 211, 238, 0.65);
+    color: #a5f3fc;
+  }
 
   .topbar { gap: 8px; }
   .choiceInner { min-height: auto; gap: 8px; }
@@ -243,9 +247,11 @@ const splashMarkup = String.raw`
 </div>
 <script id="caq-mobile-controller">
 (() => {
+  const appBuild = '0.4.0';
   const splash = document.getElementById('caq-app-splash');
   const started = performance.now();
   let splashHidden = false;
+  document.documentElement.dataset.caqBuild = appBuild;
 
   function hideSplash() {
     if (splashHidden || !splash) return;
@@ -266,11 +272,12 @@ const splashMarkup = String.raw`
 
   function enhanceWorldMap(stage) {
     if (!stage || stage.dataset.caqScrollableMap === '1') return;
-    const realms = Array.from(stage.querySelectorAll(':scope > .floatingRealm'));
-    const svg = stage.querySelector(':scope > .questWorldSvg');
+    /* Avoid :scope here: some Android System WebView releases reject that selector. */
+    const stageChildren = Array.from(stage.children);
+    const realms = stageChildren.filter((child) => child.classList.contains('floatingRealm'));
+    const svg = stageChildren.find((child) => child.classList.contains('questWorldSvg'));
     if (!svg || realms.length !== mapX.length) return;
 
-    stage.dataset.caqScrollableMap = '1';
     stage.tabIndex = 0;
     stage.setAttribute('role', 'region');
     stage.setAttribute('aria-label', 'Adventure world map. Scroll horizontally to explore all islands.');
@@ -305,18 +312,32 @@ const splashMarkup = String.raw`
       stage.scrollBy({ left: event.key === 'ArrowLeft' ? -280 : 280, behavior: 'smooth' });
     });
 
+    const worldMap = stage.closest('.questWorldMap');
+    const pillRow = worldMap ? worldMap.querySelector('.questPillRow') : null;
+    if (pillRow && !pillRow.querySelector('.caqBuildBadge')) {
+      const buildBadge = document.createElement('span');
+      buildBadge.className = 'questPill caqBuildBadge';
+      buildBadge.textContent = 'Build ' + appBuild;
+      pillRow.appendChild(buildBadge);
+    }
+
+    stage.dataset.caqScrollableMap = '1';
+    stage.dataset.caqMapBuild = appBuild;
     requestAnimationFrame(() => { stage.scrollLeft = 0; });
   }
 
   function enhanceRenderedMaps(root = document) {
-    root.querySelectorAll?.('.questWorldMap .questWorldStage').forEach(enhanceWorldMap);
+    if (root.nodeType === Node.ELEMENT_NODE && root.matches('.questWorldMap .questWorldStage')) {
+      enhanceWorldMap(root);
+    }
+    if (!root.querySelectorAll) return;
+    root.querySelectorAll('.questWorldMap .questWorldStage').forEach(enhanceWorldMap);
   }
 
   const observer = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
       for (const node of mutation.addedNodes) {
         if (node.nodeType !== Node.ELEMENT_NODE) continue;
-        if (node.matches?.('.questWorldStage')) enhanceWorldMap(node);
         enhanceRenderedMaps(node);
       }
     }
