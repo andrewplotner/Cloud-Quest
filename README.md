@@ -4,6 +4,8 @@ A self-contained AWS architecture study game packaged for Android through [Capac
 
 The complete HTML game is stored losslessly as compressed chunks under `game/chunks/`. The build reconstructs it, then adds mobile viewport and safe-area support plus the Architect Blueprint loading screen without rewriting the uploaded source.
 
+The current packaged source is **v8.5**. Its Adventure world map uses a 2400px horizontal track: phones initially show Tutorial Islands and Keyword Coast, while wider desktop windows expose more of the route before scrolling is needed.
+
 ## Quick start
 
 ```bash
