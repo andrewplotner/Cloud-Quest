@@ -2,7 +2,7 @@
 
 A self-contained AWS architecture study game packaged for Android with a minimal Capacitor host.
 
-The complete HTML game is stored losslessly as compressed chunks under `game/chunks/`. The current packaged source is **v8.8**.
+The complete HTML game is stored losslessly as compressed chunks under `game/chunks/`. The current packaged source is **v8.9**.
 
 The build reconstructs the uploaded file byte-for-byte as `dist/index.html`. Capacitor copies that file to `android/app/src/main/assets/public/index.html`, and the sync command verifies that both files remain byte-identical. The project does not inject CSS or JavaScript, rewrite viewport settings, or contain Adventure map overrides.
 
@@ -38,7 +38,7 @@ See [`docs/PLAY_STORE.md`](docs/PLAY_STORE.md) for release preparation and Play 
 
 ## Project layout
 
-- `game/chunks/` — lossless compressed copy of the canonical self-contained game
+- `game/chunks/` — lossless compressed, base64-encoded copy of the canonical self-contained game
 - `scripts/build.mjs` — lossless reconstruction of the uploaded HTML
 - `scripts/verify-android-html.mjs` — byte identity and empty-plugin verification after Capacitor sync
 - `capacitor.config.ts` — minimal Capacitor identity and web directory configuration
