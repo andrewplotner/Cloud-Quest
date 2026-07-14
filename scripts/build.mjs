@@ -12,7 +12,10 @@ if (chunkNames.length === 0) {
 }
 
 const chunks = await Promise.all(
-  chunkNames.map((name) => fs.readFile(path.join(chunkDirectory, name))),
+  chunkNames.map(async (name) => Buffer.from(
+    await fs.readFile(path.join(chunkDirectory, name), 'utf8'),
+    'base64',
+  )),
 );
 const html = gunzipSync(Buffer.concat(chunks));
 
