@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="AppTheme" parent="android:style/Theme.Material.Light.NoActionBar">
-        <item name="android:fontFamily">sans</item>
+    <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="android:statusBarColor">#06142E</item>
         <item name="android:navigationBarColor">#06142E</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowActionModeOverlay">true</item>
         <item name="android:windowNoTitle">true</item>
     </style>
 
-    <style name="AppTheme.Launch" parent="Theme.SplashScreen">
+    <style name="AppTheme.NoActionBar" parent="AppTheme" />
+
+    <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">#06142E</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/arch_quest_mark</item>
-        <item name="postSplashScreenTheme">@style/AppTheme</item>
+        <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
     </style>
 
 </resources>
