@@ -2,11 +2,11 @@
 
 A self-contained AWS architecture study game packaged for Android through [Capacitor](https://capacitorjs.com/).
 
-The complete HTML game is stored losslessly as compressed chunks under `game/chunks/`. The build reconstructs it, then adds mobile viewport and safe-area support plus the Architect Blueprint loading screen without rewriting the uploaded source.
+The complete HTML game is stored losslessly as compressed chunks under `game/chunks/`. The current packaged source is **v8.8**.
 
-The current packaged source is **v8.5**. Its Adventure world map uses one fixed 2400×680 canvas for route paths, island artwork, status ribbons, and captions. Phones initially show Tutorial Islands and Keyword Coast, while wider desktop windows expose more of the route before scrolling is needed.
+The build reconstructs the uploaded file byte-for-byte as `dist/index.html`; it does not inject or rewrite any HTML, CSS, or JavaScript. Capacitor displays that file unchanged inside the Android WebView. App icons and the native launch screen remain Android resources outside the game document.
 
-Android test builds display their application build number in the Adventure map header. Starting with 0.5.0, the fixed map track is emitted directly by the game renderer instead of being added by a runtime observer. The CI workflow caches a stable debug signing key so builds after 0.4.0 can update one another without losing local game progress.
+The CI workflow caches a stable debug signing key so current test builds can update one another without losing local game progress.
 
 ## Quick start
 
@@ -37,8 +37,8 @@ See [`docs/PLAY_STORE.md`](docs/PLAY_STORE.md) for release preparation and Play 
 ## Project layout
 
 - `game/chunks/` — lossless compressed copy of the canonical self-contained game
-- `scripts/build.mjs` — repeatable mobile packaging and splash injection
-- `assets/splash/` — in-app loading artwork
+- `scripts/build.mjs` — lossless reconstruction of the uploaded HTML
+- `assets/splash/` — retained source artwork; the Android launch screen is stored under `android/app/src/main/res/`
 - `assets/source/` — original, unmodified source artwork for future asset work
 - `capacitor.config.ts` — Android wrapper identity and web bundle location
 - `android/` — generated native Android Studio project
