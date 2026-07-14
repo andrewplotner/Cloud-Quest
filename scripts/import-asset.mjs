@@ -16,15 +16,20 @@ const outputDirectory = kind === 'game'
   : path.join(root, 'assets', 'splash', 'chunks');
 const raw = await fs.readFile(inputPath);
 const payload = kind === 'game' ? gzipSync(raw, { level: 9 }) : raw;
-const chunkSize = 200 * 1024;
+const chunkSize = kind === 'game' ? 96 * 1024 : 200 * 1024;
 
 await fs.rm(outputDirectory, { recursive: true, force: true });
 await fs.mkdir(outputDirectory, { recursive: true });
 
 const writes = [];
 for (let offset = 0, index = 0; offset < payload.length; offset += chunkSize, index += 1) {
-  const name = `part-${String(index).padStart(3, '0')}.bin`;
-  writes.push(fs.writeFile(path.join(outputDirectory, name), payload.subarray(offset, offset + chunkSize)));
+  const extension = kind === 'game' ? 'b64' : 'bin';
+  const name = `part-${String(index).padStart(3, '0')}.${extension}`;
+  const chunk = payload.subarray(offset, offset + chunkSize);
+  writes.push(fs.writeFile(
+    path.join(outputDirectory, name),
+    kind === 'game' ? chunk.toString('base64') : chunk,
+  ));
 }
 await Promise.all(writes);
 
