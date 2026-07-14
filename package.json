@@ -9,10 +9,17 @@
     "preview": "vite dist --host 0.0.0.0",
     "import:game": "node scripts/import-asset.mjs game",
     "import:splash": "node scripts/import-asset.mjs splash",
-    "android:sync": "npm run build && node scripts/sync-android.mjs",
-    "android:run": "npm run android:sync && ./android/gradlew -p android installDebug"
+    "android:sync": "npm run build && cap sync android && node scripts/verify-android-html.mjs",
+    "android:open": "cap open android",
+    "android:run": "npm run android:sync && cap run android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.4.1",
+    "@capacitor/core": "^8.4.1"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.4.1",
+    "typescript": "^6.0.3",
     "vite": "^8.1.4"
   }
 }
