@@ -65,3 +65,7 @@ npm run android:sync
 ```
 
 The import command replaces the committed chunks without modifying the source document. The same workflow is available for replacement splash art with `npm run import:splash -- /path/to/splash.png`.
+
+## Update the launcher icon
+
+The image shown on the phone is controlled by Android resources, not the HTML or Capacitor configuration. In Android Studio, use the **Image Asset** tool for the `android/app` module, select the replacement source image, and regenerate the `ic_launcher`, `ic_launcher_round`, and `ic_launcher_foreground` resources under `android/app/src/main/res/mipmap-*`. Keep the adaptive icon XML files in `mipmap-anydpi-v26` pointed at `@mipmap/ic_launcher_foreground`.
