@@ -8,8 +8,8 @@ android {
         applicationId 'com.andrewplotner.cloudquest'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 20
-        versionName '0.9.10'
+        versionCode 21
+        versionName '0.9.12'
         aaptOptions {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
