@@ -2,7 +2,7 @@
 
 A self-contained AWS architecture study game packaged for Android with a minimal Capacitor host.
 
-The complete HTML game is stored losslessly as compressed chunks under `game/chunks/`. The current packaged source is **v9.10**.
+The complete HTML game is stored losslessly as compressed chunks under `game/chunks/`. The current packaged source is **v9.12**.
 
 See [Read Me: What Is Cloud Quest?](Read-Me-What-Is-Cloud-Quest.pdf) for a visual overview of the game, learning loop, and intended audience.
 
